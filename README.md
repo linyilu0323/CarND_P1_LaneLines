@@ -1,54 +1,60 @@
-# **Finding Lane Lines on the Road** 
-[![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
+# **Finding Lane Lines on the Road**
 
-Overview
 ---
 
-When we drive, we use our eyes to decide where to go.  The lines on the road that show us where the lanes are act as our constant reference for where to steer the vehicle.  Naturally, one of the first things we would like to do in developing a self-driving car is to automatically detect lane lines using an algorithm.
+**Finding Lane Lines on the Road**
 
-In this project you will detect lane lines in images using Python and OpenCV.  OpenCV means "Open-Source Computer Vision", which is a package that has many useful tools for analyzing images.  
-
-To complete the project, two files will be submitted: a file containing project code and a file containing a brief write up explaining your solution. We have included template files to be used both for the [code](https://github.com/udacity/CarND-LaneLines-P1/blob/master/P1.ipynb) and the [writeup](https://github.com/udacity/CarND-LaneLines-P1/blob/master/writeup_template.md).The code file is called P1.ipynb and the writeup template is writeup_template.md 
-
-To meet specifications in the project, take a look at the requirements in the [project rubric](https://review.udacity.com/#!/rubrics/322/view)
+The goals / steps of this project are the following:
+* Make a pipeline that finds lane lines on the road
+* Reflect on your work in a written report
 
 
-Creating a Great Writeup
----
-For this project, a great writeup should provide a detailed response to the "Reflection" section of the [project rubric](https://review.udacity.com/#!/rubrics/322/view). There are three parts to the reflection:
+[//]: # (Image References)
 
-1. Describe the pipeline
+[image1]: ./examples/Step2.png "Grayscale"
+[image2]: ./examples/Step3.png "Grayscale"
+[image3]: ./examples/Step4.png "Grayscale"
+[image3]: ./examples/Final.png
 
-2. Identify any shortcomings
-
-3. Suggest possible improvements
-
-We encourage using images in your writeup to demonstrate how your pipeline works.  
-
-All that said, please be concise!  We're not looking for you to write a book here: just a brief description.
-
-You're not required to use markdown for your writeup.  If you use another method please just submit a pdf of your writeup. Here is a link to a [writeup template file](https://github.com/udacity/CarND-LaneLines-P1/blob/master/writeup_template.md). 
-
-
-The Project
 ---
 
-## If you have already installed the [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit/blob/master/README.md) you should be good to go!   If not, you should install the starter kit to get started on this project. ##
+### Reflection
 
-**Step 1:** Set up the [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit/blob/master/README.md) if you haven't already.
+### 1. Describe your pipeline. As part of the description, explain how you modified the draw_lines() function.
 
-**Step 2:** Open the code in a Jupyter Notebook
+The lane detection image processing pipeline is consisted of 6 steps:
 
-You will complete the project code in a Jupyter notebook.  If you are unfamiliar with Jupyter Notebooks, check out [Udacity's free course on Anaconda and Jupyter Notebooks](https://classroom.udacity.com/courses/ud1111) to get started.
+1. **Pre-Processing:** In this step, the image is converted to HLS color space. Unlike the provided helper function (which uses grayscale image), HLS color space provides better capability in separating different colors. The white and yellow sections of images are being extracted, all other colors are discarded, the masked image is then converted to grayscale for easier handling.
 
-Jupyter is an Ipython notebook where you can run blocks of code and see results interactively.  All the code for this project is contained in a Jupyter notebook. To start Jupyter in your browser, use terminal to navigate to your project directory and then run the following command at the terminal prompt (be sure you've activated your Python 3 carnd-term1 environment as described in the [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit/blob/master/README.md) installation instructions!):
+2. **Gaussian Blur:** In this step, the gaussian blur filter is applied to the image to smooth the edges.
+![Image Output After Gaussian Blur][image1]
 
-`> jupyter notebook`
+3. **Canny Edge Detection:** In this step, I use the canny edge detection algorithm to extract edges from the masked image.
+![Image Output After Canny Edge Detection][image2]
 
-A browser window will appear showing the contents of the current directory.  Click on the file called "P1.ipynb".  Another browser window will appear displaying the notebook.  Follow the instructions in the notebook to complete the project.  
+4. **Mask Region-of-Interest:** In this step, a polygon area is defined with the image x and y sizes in mind (ROI is defined as a function of the image height and width). I always start with the left and right bottom corner of the image, then go up roughly 60% of the image height and roughly 48% away from left and right sides of image. After this, the masked image should contain only car lane edges.
+![Detected Edges in Region-of-Interest][image3]
 
-**Step 3:** Complete the project and submit both the Ipython notebook and the project writeup
+5. **Hough Transform:** In this step, the masked edges are fed through a Hough transformation. The connected lines are recognized.
 
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
+6. **Reconstruct Car Lane:** With the lines recognized from Hough transform, the next step will be to reconstruct and draw the car lanes on the original image. I would like to have an averaged/extrapolated line, so the sub-steps taken are:
+  **(1) Categorize left and right lane lines:** I use the slope of lines to determine whether it belongs to left lane or right lane group. I then put the [x,y] coordinates of the lines to a bucket where I store all the endpoints for left/right lanes respectively.
+  **(2) Run Linear Regression:** The best method to get an averaged car lane from endpoints would be running a linear regression, the least square method is used. This will give me the slope and intercept of the car lanes (left and right respectively).
+  **(3) Draw Car Lanes:** After I have the slope and intercept of the left and right car lane, I can now draw the lanes on the original image with a given upper and lower bound for y axis.
 
+The final result will look like below image:
+![Final Output Image with Lane Lines Marked][image4]
+
+### 2. Identify potential shortcomings with your current pipeline
+
+The potential shortcomings of the current pipeline include:
+
+1. **Failure to recognize lane lines at low contrast:** When running the challenge video with the current pipeline, the code was unable to recognize car lanes when the color contrast gets lower - when the road surface changes from asphalt (darker color) to concrete (yellow-white-ish color, 00:04-00:06 of challenge video).
+
+2. **Non-ideal performance when lane lines are curvy:** Because the current pipeline uses linear regression to average all lane lines recognized, the represented car lanes looked less than ideal when the lanes are curvy.
+
+### 3. Suggest possible improvements to your pipeline
+
+A possible future update to this pipeline would be to improve the code robustness to combat with low contrast frames and sudden lost of lane-recognition. Possible solutions could include: pre-process the image to increase contrast before feeding into the pipeline; add "if-then" criteria to the code to handle cases when no lanes are recognized; use the result from last frame as a "low-fidelity" alternative when this scenario happens.
+
+Another improvement would be to better deal with curvy roads, instead of always using linear regression, a second-order polynomial regression could be used to improve lane line quality at curvy roads.
