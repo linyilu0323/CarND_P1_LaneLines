@@ -32,7 +32,7 @@ The lane detection image processing pipeline is consisted of 6 steps:
 3. **Canny Edge Detection:** In this step, I use the canny edge detection algorithm to extract edges from the masked image.
 ![Image Output After Canny Edge Detection][image2]
 
-4. **Mask Region-of-Interest:** In this step, a polygon area is defined with the image x and y sizes in mind (ROI is defined as a function of the image height and width). I always start with the left and right bottom corner of the image, then go up roughly 60% of the image height and roughly 48% away from left and right sides of image. After this, the masked image should contain only car lane edges.
+4. **Mask Region-of-Interest:** In this step, a polygon area is defined with the image x and y sizes in mind (ROI is defined as a function of the image height and width). I always start with the left and right bottom corner of the image, then go up roughly 60% of the image height and roughly 48% away from left and right sides of image. After this, the masked image should contain only car lane edges.  
 ![Detected Edges in Region-of-Interest][image3]
 
 5. **Hough Transform:** In this step, the masked edges are fed through a Hough transformation. The connected lines are recognized.
@@ -43,7 +43,6 @@ The lane detection image processing pipeline is consisted of 6 steps:
   **(3) Draw Car Lanes:** After I have the slope and intercept of the left and right car lane, I can now draw the lanes on the original image with a given upper and lower bound for y axis.
 
 The final result will look like below image:
-
 ![Final Output Image with Lane Lines Marked][image4]
 
 ### 2. Identify potential shortcomings with your current pipeline
