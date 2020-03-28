@@ -42,7 +42,7 @@ The lane detection image processing pipeline is consisted of 6 steps:
   **(2) Run Linear Regression:** The best method to get an averaged car lane from endpoints would be running a linear regression, the least square method is used. This will give me the slope and intercept of the car lanes (left and right respectively).
   **(3) Draw Car Lanes:** After I have the slope and intercept of the left and right car lane, I can now draw the lanes on the original image with a given upper and lower bound for y axis.
 
-The final result will look like below image:
+The final result will look like below image:  
 ![Final Output Image with Lane Lines Marked][image4]
 
 ### 2. Identify potential shortcomings with your current pipeline
