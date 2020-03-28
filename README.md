@@ -14,7 +14,7 @@ The goals / steps of this project are the following:
 [image1]: ./examples/Step2.png "Grayscale"
 [image2]: ./examples/Step3.png "Grayscale"
 [image3]: ./examples/Step4.png "Grayscale"
-[image3]: ./examples/Final.png
+[image4]: ./examples/Final.png
 
 ---
 
@@ -43,6 +43,7 @@ The lane detection image processing pipeline is consisted of 6 steps:
   **(3) Draw Car Lanes:** After I have the slope and intercept of the left and right car lane, I can now draw the lanes on the original image with a given upper and lower bound for y axis.
 
 The final result will look like below image:
+
 ![Final Output Image with Lane Lines Marked][image4]
 
 ### 2. Identify potential shortcomings with your current pipeline
